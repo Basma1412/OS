@@ -23,17 +23,25 @@ public class MemoryFrame extends javax.swing.JFrame {
         int counter = 0;
         int summation = 0;
         int moveNext = 0;
-        boolean noSpace=false;
-        while ((summation < p_allocated.get_Size())) {
+        boolean noSpace = false;
+        int begin=0;
+        while ((summation < p_allocated.get_Size())) 
+        {
 
-            noSpace=false;
-            
+           
+
             if (((allholes[counter].occupied))) {
                 counter++;
                 summation = 0;
                 moveNext = 0;
-                noSpace=true;
+                noSpace = true;
                 continue;
+            }
+            
+            if(noSpace)
+            {
+                begin=counter;
+                 noSpace = false;
             }
             if (moveNext == 50) {
                 counter++;
@@ -43,29 +51,62 @@ public class MemoryFrame extends javax.swing.JFrame {
             summation += 1;
 
         }
-        
-        if (noSpace)
-        {
-            
-        }
+
+        if (noSpace) {
+
+        } 
         else {
-            int z=0;
-            for (; z<counter;z++)
-            {
+            int z = begin;
+            for (; z < counter; z++) {
                 allholes[z].setoccupied();
                 allholes[z].pList.add(p_allocated);
-                allholes[z].free_space=0;
+                allholes[z].free_space = 0;
             }
-            
-            if (moveNext>0)
-            {
+
+            if (moveNext > 0) {
                 allholes[z].addProcess(p_allocated, moveNext);
             }
         }
-        
+
+        drawMemory();
+
     }
 
     private void bestFit() {
+    }
+
+    private void drawMemory() {
+
+        output.setText(" Memory would be like : ");
+        output.append("\n");
+
+        int c = 0;
+
+        for (int i = 0; i < allholes.length; i++) {
+            output.append("\n");
+            output.append(allholes[i].starting_address + "");
+            output.append("\n");
+            if (allholes[i].pList.size() > 0) {
+                
+                for (int z = 0; z < allholes[i].pList.size(); z++) {
+                    output.append("PROCESS " + allholes[i].pList.get(z).num);
+                    output.append("\n");
+                }
+                
+            }
+            else 
+            {
+                 output.append("Free" );
+                    output.append("\n");
+            }
+
+
+            output.append(allholes[i].end_address + "");
+            output.append("\n");
+
+
+        }
+
     }
 
     class Hole {
@@ -93,9 +134,8 @@ public class MemoryFrame extends javax.swing.JFrame {
         public void addProcess(Process p, int space) {
             pList.add(p);
             free_space -= space;
-            if (free_space==0)
-            {
-                this.occupied=true;
+            if (free_space == 0) {
+                this.occupied = true;
             }
         }
 
@@ -239,7 +279,7 @@ public class MemoryFrame extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        output = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -272,11 +312,11 @@ public class MemoryFrame extends javax.swing.JFrame {
             }
         });
 
-        jTextArea1.setBackground(new java.awt.Color(204, 204, 204));
-        jTextArea1.setColumns(20);
-        jTextArea1.setFont(new java.awt.Font("Times New Roman", 3, 12)); // NOI18N
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        output.setBackground(new java.awt.Color(204, 204, 204));
+        output.setColumns(20);
+        output.setFont(new java.awt.Font("Times New Roman", 3, 12)); // NOI18N
+        output.setRows(5);
+        jScrollPane1.setViewportView(output);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -370,8 +410,8 @@ public class MemoryFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
     private java.awt.Choice method;
+    private javax.swing.JTextArea output;
     private javax.swing.JTextField processData;
     // End of variables declaration//GEN-END:variables
 }
