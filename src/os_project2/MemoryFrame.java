@@ -9,6 +9,12 @@ public class MemoryFrame extends javax.swing.JFrame {
     WholeMemory mem;
     Hole[] allholes = new Hole[20];
     Process p_allocated;
+    int currentHole = 0;
+
+    compareHoles[] cH = new compareHoles[100];
+  
+
+    compareHoles chosen;
 
     private void initHoles() {
         int stA = 0;
@@ -24,11 +30,8 @@ public class MemoryFrame extends javax.swing.JFrame {
         int summation = 0;
         int moveNext = 0;
         boolean noSpace = false;
-        int begin=0;
-        while ((summation < p_allocated.get_Size())) 
-        {
-
-           
+        int begin = 0;
+        while ((summation < p_allocated.get_Size())) {
 
             if (((allholes[counter].occupied))) {
                 counter++;
@@ -37,11 +40,10 @@ public class MemoryFrame extends javax.swing.JFrame {
                 noSpace = true;
                 continue;
             }
-            
-            if(noSpace)
-            {
-                begin=counter;
-                 noSpace = false;
+
+            if (noSpace) {
+                begin = counter;
+                noSpace = false;
             }
             if (moveNext == 50) {
                 counter++;
@@ -54,8 +56,7 @@ public class MemoryFrame extends javax.swing.JFrame {
 
         if (noSpace) {
 
-        } 
-        else {
+        } else {
             int z = begin;
             for (; z < counter; z++) {
                 allholes[z].setoccupied();
@@ -73,6 +74,88 @@ public class MemoryFrame extends javax.swing.JFrame {
     }
 
     private void bestFit() {
+
+          
+    for (int a=0 ; a<100;a++)
+    {
+        cH[a]=new compareHoles();
+    }
+        
+        for (int i = 0; i < allholes.length; i++) {
+            if (allholes[i].occupied) {
+                currentHole++;
+            } else if (allholes[i].pList.size()>0) {
+                cH[++currentHole].size += 50 - allholes[i].getSizeOfList();
+            } else {
+                
+                cH[currentHole].size += 50;
+                cH[currentHole].addId(i);
+            }
+        }
+
+        int cN = 0;
+        int minSize = 2000;
+        for (compareHoles cH1 : cH) {
+            if(cH1.size==0)continue;
+            
+            if (cH1.size < minSize) {
+                chosen = cH1;
+                minSize = cH1.size;
+            }
+
+            cN++;
+        }
+
+        int temp = p_allocated.p_Size;
+        
+        for (Integer id : chosen.ids) {
+            if(temp>0)
+            {if (temp > 50) {
+                if (allholes[id].free_space >= 50) {
+                    allholes[id].setoccupied();
+                    allholes[id].pList.add(p_allocated);
+                    allholes[id].free_space = 0;
+                    temp -= 50;
+                } else {
+                    allholes[id].setoccupied();
+                    allholes[id].pList.add(p_allocated);
+                    allholes[id].free_space = 0;
+                    temp -= allholes[id].free_space;
+                }
+            } else {
+                if (allholes[id].free_space >= 50) {
+                    allholes[id].setoccupied();
+                    allholes[id].pList.add(p_allocated);
+                    allholes[id].free_space = 0;
+                    temp =0;
+                } else {
+                    allholes[id].setoccupied();
+                    allholes[id].pList.add(p_allocated);
+                    allholes[id].free_space = 0;
+                    int remain = allholes[id].free_space;
+                    if (temp>remain)temp-=remain;else temp=0;
+                }
+            }
+        }}
+        
+        chosen.ids=new ArrayList<>();
+        chosen.size=0;
+drawMemory();
+    }
+
+    class compareHoles {
+
+        int size;
+        ArrayList<Integer> ids;
+
+        public compareHoles() {
+            size = 0;
+            ids = new ArrayList<>();
+        }
+
+        public void addId(int id) {
+            ids.add(id);
+        }
     }
 
     private void drawMemory() {
@@ -87,23 +170,19 @@ public class MemoryFrame extends javax.swing.JFrame {
             output.append(allholes[i].starting_address + "");
             output.append("\n");
             if (allholes[i].pList.size() > 0) {
-                
+
                 for (int z = 0; z < allholes[i].pList.size(); z++) {
                     output.append("PROCESS " + allholes[i].pList.get(z).num);
                     output.append("\n");
                 }
-                
-            }
-            else 
-            {
-                 output.append("Free" );
-                    output.append("\n");
-            }
 
+            } else {
+                output.append("Free");
+                output.append("\n");
+            }
 
             output.append(allholes[i].end_address + "");
             output.append("\n");
-
 
         }
 
@@ -151,9 +230,8 @@ public class MemoryFrame extends javax.swing.JFrame {
         public int get_end() {
             return this.end_address;
         }
-        
-        public boolean containsProcess(int n)
-        {
+
+        public boolean containsProcess(int n) {
             for (Process pList1 : pList) {
                 if (pList1.num == n) {
                     return true;
@@ -161,15 +239,22 @@ public class MemoryFrame extends javax.swing.JFrame {
             }
             return false;
         }
-        
-           public Process getProcess(int n)
-        {
+
+        public Process getProcess(int n) {
             for (Process pList1 : pList) {
                 if (pList1.num == n) {
                     return pList1;
                 }
             }
             return null;
+        }
+
+        public int getSizeOfList() {
+            int sum = 0;
+            for (Process pList1 : pList) {
+                sum += pList1.p_Size;
+            }
+            return sum;
         }
 
     }
@@ -201,7 +286,7 @@ public class MemoryFrame extends javax.swing.JFrame {
     }
 
     private void deallocate() {
-        
+
         for (Hole allhole : allholes) {
             if (allhole.containsProcess(deallocation)) {
                 allhole.occupied = false;
@@ -210,7 +295,7 @@ public class MemoryFrame extends javax.swing.JFrame {
                 allhole.pList.remove(pTemp);
             }
         }
-        
+
         drawMemory();
 
     }
@@ -375,9 +460,9 @@ public class MemoryFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 262, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(49, 49, 49))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 204, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -388,9 +473,9 @@ public class MemoryFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
                 .addComponent(jLabel1)
-                .addGap(66, 66, 66)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(66, 66, 66)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel2)
                             .addComponent(method, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -405,8 +490,8 @@ public class MemoryFrame extends javax.swing.JFrame {
                             .addComponent(deallocatedProcess, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton2)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(8, 8, 8)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(53, 53, 53)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(24, Short.MAX_VALUE))
         );
 
