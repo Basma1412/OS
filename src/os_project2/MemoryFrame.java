@@ -151,6 +151,26 @@ public class MemoryFrame extends javax.swing.JFrame {
         public int get_end() {
             return this.end_address;
         }
+        
+        public boolean containsProcess(int n)
+        {
+            for (Process pList1 : pList) {
+                if (pList1.num == n) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+           public Process getProcess(int n)
+        {
+            for (Process pList1 : pList) {
+                if (pList1.num == n) {
+                    return pList1;
+                }
+            }
+            return null;
+        }
 
     }
 
@@ -181,6 +201,17 @@ public class MemoryFrame extends javax.swing.JFrame {
     }
 
     private void deallocate() {
+        
+        for (Hole allhole : allholes) {
+            if (allhole.containsProcess(deallocation)) {
+                allhole.occupied = false;
+                Process pTemp = allhole.getProcess(deallocation);
+                allhole.free_space += pTemp.p_Size;
+                allhole.pList.remove(pTemp);
+            }
+        }
+        
+        drawMemory();
 
     }
 
