@@ -172,8 +172,23 @@ drawMemory();
             if (allholes[i].pList.size() > 0) {
 
                 for (int z = 0; z < allholes[i].pList.size(); z++) {
+                    
                     output.append("PROCESS " + allholes[i].pList.get(z).num);
                     output.append("\n");
+                    
+                     
+                    if (allholes[i].pList.get(z).left_Size<50)
+                    {
+                         output.append(""+allholes[i].pList.get(z).p_Size);
+                         allholes[i].pList.get(z).left_Size=0;
+                         output.append("\n");
+                     output.append( "Free");
+                         output.append("\n");
+                    }
+                    else
+                    {
+                          allholes[i].pList.get(z).left_Size-=50;
+                    }
                 }
 
             } else {
@@ -306,10 +321,12 @@ drawMemory();
         int starting_address;
         int end_address;
         int p_Size;
+        int left_Size;
 
         public Process(int num, int size) {
             this.num = num;
             this.p_Size = size;
+            this.left_Size=p_Size;
 
         }
 
