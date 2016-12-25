@@ -9,19 +9,19 @@ public class MemoryFrame extends javax.swing.JFrame {
     String allocation_method;
     int deallocation;
     WholeMemory mem;
-    Hole[] allholes = new Hole[20];
+    Hole[] allholes = new Hole[1000];
     Process p_allocated;
     int currentHole = 0;
 
-    compareHoles[] cH = new compareHoles[100];
+    compareHoles[] cH = new compareHoles[4000];
 
     compareHoles chosen;
 
     private void initHoles() {
         int stA = 0;
-        for (int i = 0; i < 20; i++) {
-            allholes[i] = new Hole(stA, 50);
-            stA += 50;
+        for (int i = 0; i <1000; i++) {
+            allholes[i] = new Hole(stA, 1);
+            stA += 1;
         }
     }
 
@@ -46,7 +46,7 @@ public class MemoryFrame extends javax.swing.JFrame {
                 begin = counter;
                 noSpace = false;
             }
-            if (moveNext == 50) {
+            if (moveNext == 1) {
                 counter++;
                 moveNext = 0;
             }
@@ -56,11 +56,9 @@ public class MemoryFrame extends javax.swing.JFrame {
         }
 
         if (noSpace) {
-     JOptionPane.showMessageDialog(new JFrame(), "no space", "Dialog",
+            JOptionPane.showMessageDialog(new JFrame(), "no space", "Dialog",
                     JOptionPane.ERROR_MESSAGE);
-        } 
-        
-        else {
+        } else {
             int z = begin;
             for (; z < counter; z++) {
                 allholes[z].setoccupied();
@@ -77,29 +75,22 @@ public class MemoryFrame extends javax.swing.JFrame {
 
     }
 
-    
-    
-    
-    
-  
     private void bestFit() {
 
-          
-    for (int a=0 ; a<100;a++)
-    {
-        cH[a]=new compareHoles();
-    }
-    
+        for (int a = 0; a < 4000; a++) {
+            cH[a] = new compareHoles();
+        }
+
         int temp = p_allocated.p_Size;
-        
+
         for (int i = 0; i < allholes.length; i++) {
             if (allholes[i].occupied) {
                 currentHole++;
-            } else if (allholes[i].pList.size()>0) {
-                cH[++currentHole].size += 50 - allholes[i].getSizeOfList();
+            } else if (allholes[i].pList.size() > 0) {
+                cH[++currentHole].size += 1 - allholes[i].getSizeOfList();
             } else {
-                
-                cH[currentHole].size += 50;
+
+                cH[currentHole].size += 1;
                 cH[currentHole].addId(i);
             }
         }
@@ -107,9 +98,11 @@ public class MemoryFrame extends javax.swing.JFrame {
         int cN = 0;
         int minSize = 2000;
         for (compareHoles cH1 : cH) {
-            if(cH1.size==0)continue;
-            
-            if (cH1.size < minSize && cH1.size>=temp) {
+            if (cH1.size == 0) {
+                continue;
+            }
+
+            if (cH1.size < minSize && cH1.size >= temp) {
                 chosen = cH1;
                 minSize = cH1.size;
             }
@@ -117,42 +110,45 @@ public class MemoryFrame extends javax.swing.JFrame {
             cN++;
         }
 
-        
         for (Integer id : chosen.ids) {
-            if(temp>0)
-            {if (temp > 50) {
-                if (allholes[id].free_space >= 50) {
-                    allholes[id].setoccupied();
-                    allholes[id].pList.add(p_allocated);
-                    allholes[id].free_space = 0;
-                    temp -= 50;
+            if (temp > 0) {
+                if (temp > 1) {
+                    if (allholes[id].free_space >= 1) {
+                        allholes[id].setoccupied();
+                        allholes[id].pList.add(p_allocated);
+                        allholes[id].free_space = 0;
+                        temp -= 1;
+                    } else {
+                        allholes[id].setoccupied();
+                        allholes[id].pList.add(p_allocated);
+                        allholes[id].free_space = 0;
+                        temp -= allholes[id].free_space;
+                    }
                 } else {
-                    allholes[id].setoccupied();
-                    allholes[id].pList.add(p_allocated);
-                    allholes[id].free_space = 0;
-                    temp -= allholes[id].free_space;
-                }
-            } else {
-                if (allholes[id].free_space >= 50) {
-                    allholes[id].setoccupied();
-                    allholes[id].pList.add(p_allocated);
-                    allholes[id].free_space = 0;
-                    temp =0;
-                } else {
-                    allholes[id].setoccupied();
-                    allholes[id].pList.add(p_allocated);
-                    allholes[id].free_space = 0;
-                    int remain = allholes[id].free_space;
-                    if (temp>remain)temp-=remain;else temp=0;
+                    if (allholes[id].free_space >= 1) {
+                        allholes[id].setoccupied();
+                        allholes[id].pList.add(p_allocated);
+                        allholes[id].free_space = 0;
+                        temp = 0;
+                    } else {
+                        allholes[id].setoccupied();
+                        allholes[id].pList.add(p_allocated);
+                        allholes[id].free_space = 0;
+                        int remain = allholes[id].free_space;
+                        if (temp > remain) {
+                            temp -= remain;
+                        } else {
+                            temp = 0;
+                        }
+                    }
                 }
             }
-        }}
-        
-        chosen.ids=new ArrayList<>();
-        chosen.size=0;
-drawMemory();
-    }
+        }
 
+        chosen.ids = new ArrayList<>();
+        chosen.size = 0;
+        drawMemory();
+    }
 
     class compareHoles {
 
@@ -306,7 +302,8 @@ drawMemory();
             bestFit();
         }
     }
- boolean noprocess=true;
+    boolean noprocess = true;
+
     private void deallocate() {
 
         for (Hole allhole : allholes) {
@@ -315,16 +312,16 @@ drawMemory();
                 Process pTemp = allhole.getProcess(deallocation);
                 allhole.free_space += pTemp.p_Size;
                 allhole.pList.remove(pTemp);
-                 noprocess = false;
+                noprocess = false;
             }
         }
-          if (noprocess) {
+        if (noprocess) {
             JOptionPane.showMessageDialog(new JFrame(), "no such process exists", "Dialog",
                     JOptionPane.ERROR_MESSAGE);
-          
+
+        } else {
+            drawMemory();
         }
-          else{
-        drawMemory();}
 
     }
 
@@ -467,60 +464,60 @@ drawMemory();
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(86, 86, 86)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(50, 50, 50)
-                                .addComponent(method, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(43, 43, 43)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(processData)
-                                    .addComponent(deallocatedProcess, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE))))
-                        .addGap(111, 111, 111))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addGap(318, 318, 318)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 204, Short.MAX_VALUE)
+                        .addGap(86, 86, 86)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(50, 50, 50)
+                                        .addComponent(method, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(43, 43, 43)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(processData)
+                                            .addComponent(deallocatedProcess, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE))))
+                                .addGap(111, 111, 111))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addGap(318, 318, 318)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 204, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(70, 70, 70)))
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(390, 390, 390))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
                 .addComponent(jLabel1)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(66, 66, 66)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel2)
-                            .addComponent(method, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(54, 54, 54)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel3)
-                            .addComponent(processData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton1))
-                        .addGap(70, 70, 70)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4)
-                            .addComponent(deallocatedProcess, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton2)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(53, 53, 53)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addGap(66, 66, 66)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel2)
+                    .addComponent(method, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(54, 54, 54)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(processData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1))
+                .addGap(70, 70, 70)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(deallocatedProcess, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2))
+                .addContainerGap(454, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1))
         );
 
         pack();
