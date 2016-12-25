@@ -1,26 +1,27 @@
 package os_project2;
 
 import java.util.ArrayList;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class MemoryFrame extends javax.swing.JFrame {
 
     String allocation_method;
     int deallocation;
     WholeMemory mem;
-    Hole[] allholes = new Hole[20];
+    Hole[] allholes = new Hole[100];
     Process p_allocated;
     int currentHole = 0;
 
-    compareHoles[] cH = new compareHoles[100];
-  
+    compareHoles[] cH = new compareHoles[500];
 
     compareHoles chosen;
 
     private void initHoles() {
         int stA = 0;
-        for (int i = 0; i < 20; i++) {
-            allholes[i] = new Hole(stA, 50);
-            stA += 50;
+        for (int i = 0; i < 100; i++) {
+            allholes[i] = new Hole(stA, 10);
+            stA += 10;
         }
     }
 
@@ -45,7 +46,7 @@ public class MemoryFrame extends javax.swing.JFrame {
                 begin = counter;
                 noSpace = false;
             }
-            if (moveNext == 50) {
+            if (moveNext == 10) {
                 counter++;
                 moveNext = 0;
             }
@@ -75,20 +76,18 @@ public class MemoryFrame extends javax.swing.JFrame {
 
     private void bestFit() {
 
-          
-    for (int a=0 ; a<100;a++)
-    {
-        cH[a]=new compareHoles();
-    }
-        
+        for (int a = 0; a < 500; a++) {
+            cH[a] = new compareHoles();
+        }
+
         for (int i = 0; i < allholes.length; i++) {
             if (allholes[i].occupied) {
                 currentHole++;
-            } else if (allholes[i].pList.size()>0) {
-                cH[++currentHole].size += 50 - allholes[i].getSizeOfList();
+            } else if (allholes[i].pList.size() > 0) {
+                cH[++currentHole].size += 10 - allholes[i].getSizeOfList();
             } else {
-                
-                cH[currentHole].size += 50;
+
+                cH[currentHole].size += 10;
                 cH[currentHole].addId(i);
             }
         }
@@ -96,8 +95,10 @@ public class MemoryFrame extends javax.swing.JFrame {
         int cN = 0;
         int minSize = 2000;
         for (compareHoles cH1 : cH) {
-            if(cH1.size==0)continue;
-            
+            if (cH1.size == 0) {
+                continue;
+            }
+
             if (cH1.size < minSize) {
                 chosen = cH1;
                 minSize = cH1.size;
@@ -107,40 +108,45 @@ public class MemoryFrame extends javax.swing.JFrame {
         }
 
         int temp = p_allocated.p_Size;
-        
+
         for (Integer id : chosen.ids) {
-            if(temp>0)
-            {if (temp > 50) {
-                if (allholes[id].free_space >= 50) {
-                    allholes[id].setoccupied();
-                    allholes[id].pList.add(p_allocated);
-                    allholes[id].free_space = 0;
-                    temp -= 50;
+            if (temp > 0) {
+                if (temp > 10) {
+                    if (allholes[id].free_space >= 10) {
+                        allholes[id].setoccupied();
+                        allholes[id].pList.add(p_allocated);
+                        allholes[id].free_space = 0;
+                        temp -= 10;
+                    } else {
+                        allholes[id].setoccupied();
+                        allholes[id].pList.add(p_allocated);
+                        allholes[id].free_space = 0;
+                        temp -= allholes[id].free_space;
+                    }
                 } else {
-                    allholes[id].setoccupied();
-                    allholes[id].pList.add(p_allocated);
-                    allholes[id].free_space = 0;
-                    temp -= allholes[id].free_space;
-                }
-            } else {
-                if (allholes[id].free_space >= 50) {
-                    allholes[id].setoccupied();
-                    allholes[id].pList.add(p_allocated);
-                    allholes[id].free_space = 0;
-                    temp =0;
-                } else {
-                    allholes[id].setoccupied();
-                    allholes[id].pList.add(p_allocated);
-                    allholes[id].free_space = 0;
-                    int remain = allholes[id].free_space;
-                    if (temp>remain)temp-=remain;else temp=0;
+                    if (allholes[id].free_space >= 10) {
+                        allholes[id].setoccupied();
+                        allholes[id].pList.add(p_allocated);
+                        allholes[id].free_space = 0;
+                        temp = 0;
+                    } else {
+                        allholes[id].setoccupied();
+                        allholes[id].pList.add(p_allocated);
+                        allholes[id].free_space = 0;
+                        int remain = allholes[id].free_space;
+                        if (temp > remain) {
+                            temp -= remain;
+                        } else {
+                            temp = 0;
+                        }
+                    }
                 }
             }
-        }}
-        
-        chosen.ids=new ArrayList<>();
-        chosen.size=0;
-drawMemory();
+        }
+
+        chosen.ids = new ArrayList<>();
+        chosen.size = 0;
+        drawMemory();
     }
 
     class compareHoles {
@@ -172,23 +178,8 @@ drawMemory();
             if (allholes[i].pList.size() > 0) {
 
                 for (int z = 0; z < allholes[i].pList.size(); z++) {
-                    
                     output.append("PROCESS " + allholes[i].pList.get(z).num);
                     output.append("\n");
-                    
-                     
-                    if (allholes[i].pList.get(z).left_Size<50)
-                    {
-                         output.append(""+allholes[i].pList.get(z).p_Size);
-                         allholes[i].pList.get(z).left_Size=0;
-                         output.append("\n");
-                     output.append( "Free");
-                         output.append("\n");
-                    }
-                    else
-                    {
-                          allholes[i].pList.get(z).left_Size-=50;
-                    }
                 }
 
             } else {
@@ -300,6 +291,8 @@ drawMemory();
         }
     }
 
+    boolean noprocess = true;
+
     private void deallocate() {
 
         for (Hole allhole : allholes) {
@@ -308,10 +301,18 @@ drawMemory();
                 Process pTemp = allhole.getProcess(deallocation);
                 allhole.free_space += pTemp.p_Size;
                 allhole.pList.remove(pTemp);
+                noprocess = false;
             }
-        }
 
-        drawMemory();
+        }
+        if (noprocess) {
+            JOptionPane.showMessageDialog(new JFrame(), "no such process exists", "Dialog",
+                    JOptionPane.ERROR_MESSAGE);
+          
+        }
+        else {
+              drawMemory();
+        }
 
     }
 
@@ -321,12 +322,10 @@ drawMemory();
         int starting_address;
         int end_address;
         int p_Size;
-        int left_Size;
 
         public Process(int num, int size) {
             this.num = num;
             this.p_Size = size;
-            this.left_Size=p_Size;
 
         }
 
